@@ -1,9 +1,7 @@
 (ns valida-email
   (:require
-    [schema-refined.core :as r]
-    [schema.core :as s]
-   )
-  )
+   [schema-refined.core :as r]
+   [schema.core :as s]))
 
 (defn- match-regex?
   "Check if the string matches the regex"

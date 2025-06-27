@@ -14,9 +14,7 @@ import java.util.stream.Stream;
 
 public class DatomicFake implements Database {
 
-
     private final Set<Object[]> dataSet = new HashSet<>();
-
 
     public DatomicFake (Set<Object[]> dados) {
         this.dataSet.addAll(dados);
@@ -33,7 +31,7 @@ public class DatomicFake implements Database {
     @Override
     public Map<Object, Object> pull(Object dbOrId, Object selector) {
         System.out.println("opaaa...");
-        throw new UnsupportedOperationException("Método não suportado.");
+        throw new UnsupportedOperationException("Metodo não suportado.");
     }    
 
     /**

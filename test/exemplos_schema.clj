@@ -1,46 +1,27 @@
 (ns exemplos-schema
   (:require
-   [schema.core :as s]
    [schema.coerce :as coerce]
-   [schema.utils :as u]
-   [schema.spec.core :as spec]
-            ;;   :include-macros true ;; cljs only
+   [schema.core :as s]
+   [schema.utils :as u] ;; :include-macros true ;; cljs only
    )
-(:import 
-       [java.time LocalDate]
-        [java.time.format DateTimeFormatter])  
-  )
-
-
+  (:import
+   [java.time LocalDate]
+   [java.time.format DateTimeFormatter]))
 
 (s/defschema Data
   "A schema for a nested data type"
-  {:a {:b s/Str
-       :c s/Int}
-   :d [{:e s/Keyword
-        :f [s/Num]}]})
-
-(def resultad-ok (s/check
-                  Data
-                  {:a {:b "abc"
-                       :c 123}
-                   :d [{:e :bc
-                        :f [12.2 13 100]}
-                       {:e :bc
-                        :f [-1]}]}))
+  {:a {:b s/Str :c s/Int}
+   :d [{:e s/Keyword :f [s/Num]}]})
 
 ;validate solta exception e check retorna os erros(vou querer os erros normalmente)
 (s/validate
  Data
- {:a {:b "123"
-      :c 2}})
+ {:a {:b "123" :c 2}})
 
-(def resultado-com-erro 
-                         (s/check
-                          Data
-                          {:a {:b "123"
-                               :c "2"}})
-                         ) 
+(def resultado-com-erro
+  (s/check
+   Data
+   {:a {:b "123" :c "2"}}))
 
 (defn formatar-erros [resultado]
   (for [[chave erro] resultado]
@@ -54,22 +35,18 @@
     (and (string? s) (>= (count s) min) (<= (count s) max))))
 
 (s/defschema NovoAutorRequest
-  {
-   :nome (s/constrained s/Str (not-empty-string? 1 20) "Nome não pode ser vazio e precisa ter no máximo 20 caracteres")
-   :email (s/constrained (s/pred string?) (not-empty-string? 1 20) "Email é obrigatório")
-   
-})
+  {:nome (s/constrained
+          s/Str (not-empty-string? 1 20)
+          "Nome não pode ser vazio e precisa ter no máximo 20 caracteres")
+   :email (s/constrained
+           (s/pred string?)
+           (not-empty-string? 1 20)
+           "Email é obrigatório")})
 
-
-
-(def resultado-validacao-autor (s/check
-                                NovoAutorRequest
-                                {:nome 1
-                                 :email ""}))
+(def resultado-validacao-autor
+  (s/check NovoAutorRequest {:nome 1 :email ""}))
 
 (println resultado-validacao-autor)
-
-
 
 (type (:nome resultado-validacao-autor))
 
@@ -82,20 +59,14 @@
 (defn localdate-matcher [schema]
   (if (= schema LocalDate)
     (fn [value]
-      (LocalDate/parse value (DateTimeFormatter/ofPattern "yyyy-MM-dd"))
-      )
-    
-    nil
-    )
-)
+      (LocalDate/parse value (DateTimeFormatter/ofPattern "yyyy-MM-dd")))
+    nil))
 
 (defn bigdecimal-matcher [schema]
   (if (= schema java.math.BigDecimal)
     (fn [value]
       (java.math.BigDecimal. value))
-
     nil))
-
 
 (s/defschema CommentRequest
   {(s/optional-key :parent-comment-id) long
@@ -109,14 +80,12 @@
 
 (def parse-comment-request
   ;; (coerce/coercer CommentRequest coerce/json-coercion-matcher)
-  (coerce/coercer CommentRequest (fn [schema] 
-                                   (or
-                                     (coerce/json-coercion-matcher schema)
-                                     (localdate-matcher schema)
-                                     (bigdecimal-matcher schema)
-                                    )
-                                   ) 
-                  ))
+  (coerce/coercer
+   CommentRequest (fn [schema]
+                    (or
+                     (coerce/json-coercion-matcher schema)
+                     (localdate-matcher schema)
+                     (bigdecimal-matcher schema)))))
 
 (def coerced (parse-comment-request
               {:parent-comment-id (int 2128123123)
@@ -125,14 +94,13 @@
                :text "This is awesome!"
                :data "2024-12-12"
                :share-services ["twitter" "facebook"]}))
+
 (println coerced)
 
 (= coerced
-   
    {:parent-comment-id 2128123123
     :text "This is awesome!"
-    :share-services [:twitter :facebook]}
-   )
+    :share-services [:twitter :facebook]})
 
 
 
